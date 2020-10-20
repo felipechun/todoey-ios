@@ -7,11 +7,14 @@
 //
 
 import UIKit
-import CoreData
+//import CoreData
+import RealmSwift
 
 class CategoryVC: UITableViewController {
     
-    var categories = [Category]()
+    let realm = try! Realm()
+    
+    var categories: Results<Category>?
     
     // create the context from the AppDelegate, which is basically like the git staging area
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -27,15 +30,13 @@ class CategoryVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return categories.count
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
-        let category = categories[indexPath.row]
-        
-        cell.textLabel?.text = category.name
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet"
         
         return cell
     }
@@ -50,30 +51,47 @@ class CategoryVC: UITableViewController {
         let destinationVC = segue.destination as! TodoListVC
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categories[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row]
         }
     }
     
     // MARK: - Data Manipulation Methods
     
-    func saveCategories() {
+    func saveCategories(category: Category) {
         
         do {
-            try context.save()
+            // COREDATA
+//            try context.save()
+            
+            // REALM
+            try realm.write {
+                realm.add(category)
+            }
         } catch {
-            print("Error saving context \(error)")
+            print("Error saving: \(error)")
         }
     }
     
     // reading data from the database
     // the parameter is a request but also has a default value if one is not provided on the function call
-    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+    
+    // COREDATA
+//    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+//
+//        do {
+//            categories = try context.fetch(request)
+//        } catch {
+//            print("error fetching data from context: \(error)")
+//        }
+//    }
+    
+    // REALM
+    func loadCategories() {
         
-        do {
-            categories = try context.fetch(request)
-        } catch {
-            print("error fetching data from context: \(error)")
-        }
+        categories = realm.objects(Category.self)
+        
+        tableView.reloadData()
+
     }
     
     // MARK: - Add New Category
@@ -84,22 +102,27 @@ class CategoryVC: UITableViewController {
         
         let alert = UIAlertController(title: "Add New Category", message: "", preferredStyle: .alert)
         
-        let action = UIAlertAction(title: "Add Category", style: .default) { (action) in
+        // adding the textfield to the alert
+                alert.addTextField { (alertTextField) in
+                    alertTextField.placeholder = "Create new category"
+                    textField = alertTextField
+                }
+        
+        let action = UIAlertAction(title: "Add", style: .default) { (action) in
             
             // what happens once the user clicks the add category button on our UIAlert
-            let newCategory = Category(context: self.context)
-            newCategory.name = textField.text!
-            self.categories.append(newCategory)
+            // COREDATA
+//            let newCategory = Category(context: self.context)
+//            newCategory.name = textField.text!
+//            self.categories.append(newCategory)
             
-            self.saveCategories()
+            // REALM
+            let newCategory = Category()
+            newCategory.name = textField.text!
+            
+            self.saveCategories(category: newCategory)
             
             self.tableView.reloadData()
-        }
-        
-        // adding the textfield to the alert
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Create new category"
-            textField = alertTextField
         }
         
         alert.addAction(action)
