@@ -10,7 +10,7 @@ import UIKit
 //import CoreData
 import RealmSwift
 
-class CategoryVC: UITableViewController {
+class CategoryVC: SwipeTableVC {
     
     let realm = try! Realm()
     
@@ -21,6 +21,8 @@ class CategoryVC: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.rowHeight = 70.0
         
         loadCategories()
         
@@ -34,8 +36,11 @@ class CategoryVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
+        // tapping into the swipe cell from superclass
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        
+        // adding additional code to the generic swipe cell, custom for the category cell
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet"
         
         return cell
@@ -61,7 +66,7 @@ class CategoryVC: UITableViewController {
         
         do {
             // COREDATA
-//            try context.save()
+            //            try context.save()
             
             // REALM
             try realm.write {
@@ -76,14 +81,14 @@ class CategoryVC: UITableViewController {
     // the parameter is a request but also has a default value if one is not provided on the function call
     
     // COREDATA
-//    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-//
-//        do {
-//            categories = try context.fetch(request)
-//        } catch {
-//            print("error fetching data from context: \(error)")
-//        }
-//    }
+    //    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+    //
+    //        do {
+    //            categories = try context.fetch(request)
+    //        } catch {
+    //            print("error fetching data from context: \(error)")
+    //        }
+    //    }
     
     // REALM
     func loadCategories() {
@@ -91,7 +96,22 @@ class CategoryVC: UITableViewController {
         categories = realm.objects(Category.self)
         
         tableView.reloadData()
-
+        
+    }
+    
+    // MARK: - Delete Category from Swipe
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let selectedCategory = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(selectedCategory.items)
+                    self.realm.delete(selectedCategory)
+                }
+            } catch  {
+                print("Error deleting category: \(error)")
+            }
+        }
     }
     
     // MARK: - Add New Category
@@ -103,18 +123,18 @@ class CategoryVC: UITableViewController {
         let alert = UIAlertController(title: "Add New Category", message: "", preferredStyle: .alert)
         
         // adding the textfield to the alert
-                alert.addTextField { (alertTextField) in
-                    alertTextField.placeholder = "Create new category"
-                    textField = alertTextField
-                }
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new category"
+            textField = alertTextField
+        }
         
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             
             // what happens once the user clicks the add category button on our UIAlert
             // COREDATA
-//            let newCategory = Category(context: self.context)
-//            newCategory.name = textField.text!
-//            self.categories.append(newCategory)
+            //            let newCategory = Category(context: self.context)
+            //            newCategory.name = textField.text!
+            //            self.categories.append(newCategory)
             
             // REALM
             let newCategory = Category()
@@ -131,10 +151,4 @@ class CategoryVC: UITableViewController {
         
     }
     
-    
-    
-    
-    
-    
 }
-

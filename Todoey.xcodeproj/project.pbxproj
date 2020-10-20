@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		585EABA1253F4F41002A90B3 /* SwipeTableVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 585EABA0253F4F41002A90B3 /* SwipeTableVC.swift */; };
 		586E0D85253891FC0095E762 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 586E0D84253891FC0095E762 /* Item.swift */; };
 		586E0D88253892060095E762 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 586E0D87253892060095E762 /* Category.swift */; };
 		58C640A92534AEAC007FBB56 /* CategoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C640A82534AEAC007FBB56 /* CategoryVC.swift */; };
@@ -20,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		40832613A52A2E323989B5C1 /* Pods_Todoey.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Todoey.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		585EABA0253F4F41002A90B3 /* SwipeTableVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTableVC.swift; sourceTree = "<group>"; };
 		586E0D84253891FC0095E762 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		586E0D87253892060095E762 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		58C640A82534AEAC007FBB56 /* CategoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryVC.swift; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 			children = (
 				58C640A82534AEAC007FBB56 /* CategoryVC.swift */,
 				EB2BE4FD239524DB00FB933B /* TodoListVC.swift */,
+				585EABA0253F4F41002A90B3 /* SwipeTableVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -240,6 +243,7 @@
 				EB2BE4FE239524DB00FB933B /* TodoListVC.swift in Sources */,
 				58C640A92534AEAC007FBB56 /* CategoryVC.swift in Sources */,
 				EB2BE4FA239524DB00FB933B /* AppDelegate.swift in Sources */,
+				585EABA1253F4F41002A90B3 /* SwipeTableVC.swift in Sources */,
 				586E0D88253892060095E762 /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

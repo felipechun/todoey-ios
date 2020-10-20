@@ -4,7 +4,7 @@ import UIKit
 //import CoreData
 import RealmSwift
 
-class TodoListVC: UITableViewController {
+class TodoListVC: SwipeTableVC {
     
     var todoItems: Results<Item>?
     
@@ -21,15 +21,17 @@ class TodoListVC: UITableViewController {
     
     // COREDATA
     // create the context from the AppDelegate, which is basically like the git staging area
-//    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-//    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    //    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        tableView.rowHeight = 70.0
         
-//        whereIsMySQLite()
+        
+        //        whereIsMySQLite()
         
         // retrieving the local data from UserDefaults and safe checking to see if there are values inside
         //        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
@@ -44,11 +46,11 @@ class TodoListVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
-
+            
             // ternary operator => value = condition ? valueIfTrue : valueIfFalse
             cell.accessoryType = item.done == true ? .checkmark : .none
         } else {
@@ -62,15 +64,15 @@ class TodoListVC: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         // COREDATA
-//        context.delete(itemArray[indexPath.row])
-//        itemArray.remove(at: indexPath.row)
+        //        context.delete(itemArray[indexPath.row])
+        //        itemArray.remove(at: indexPath.row)
         
-//        let item = todoItems[indexPath.row]
-//
-//        // if user selects an item, it will toggle done or not done
-//        item.done = !item.done
-//
-//        saveItems()
+        //        let item = todoItems[indexPath.row]
+        //
+        //        // if user selects an item, it will toggle done or not done
+        //        item.done = !item.done
+        //
+        //        saveItems()
         
         // REALM
         if let item = todoItems?[indexPath.row] {
@@ -101,11 +103,11 @@ class TodoListVC: UITableViewController {
             // what happens once the user clicks the add item button on our UIAlert
             
             // COREDATA
-//            let newItem = Item(context: self.context)
-//            newItem.title = textField.text!
-//            newItem.done = false
-//            newItem.parentCategory = self.selectedCategory
-//            self.itemArray.append(newItem)
+            //            let newItem = Item(context: self.context)
+            //            newItem.title = textField.text!
+            //            newItem.done = false
+            //            newItem.parentCategory = self.selectedCategory
+            //            self.itemArray.append(newItem)
             
             // save itemArray in user defaults
             //            self.defaults.set(self.itemArray, forKey: "TodoListArray")
@@ -147,86 +149,98 @@ class TodoListVC: UITableViewController {
     // reading data from the database
     // the parameter is a request but also has a default value if one is not provided on the function call
     // COREDATA
-//    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
-////        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//
-//        // query to retrieve items that match the parent category
-//        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-//
-//        // safe unwrapping to allow additional predicates (such as the search bar functionality)
-//        // if it doesn't have an additional predicate, it will only perform the categoryPredicate
-//        if let additionalPredicate = predicate {
-//            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
-//        } else {
-//            request.predicate = categoryPredicate
-//        }
-//
-//        do {
-//            itemArray = try context.fetch(request)
-//        } catch {
-//            print("error fetching data from context: \(error)")
-//        }
-//    }
+    //    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
+    ////        let request: NSFetchRequest<Item> = Item.fetchRequest()
+    //
+    //        // query to retrieve items that match the parent category
+    //        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+    //
+    //        // safe unwrapping to allow additional predicates (such as the search bar functionality)
+    //        // if it doesn't have an additional predicate, it will only perform the categoryPredicate
+    //        if let additionalPredicate = predicate {
+    //            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+    //        } else {
+    //            request.predicate = categoryPredicate
+    //        }
+    //
+    //        do {
+    //            itemArray = try context.fetch(request)
+    //        } catch {
+    //            print("error fetching data from context: \(error)")
+    //        }
+    //    }
     
     // REALM
     func loadItems() {
         
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
-
+        
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let selectedItem = self.todoItems?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(selectedItem)
+                }
+            } catch  {
+                print("Error deleting item: \(error)")
+            }
+        }
     }
     
     
     // MARK: - get SQLite path
-//    func whereIsMySQLite() {
-//        let path = FileManager
-//            .default
-//            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
-//            .last?
-//            .absoluteString
-//            .replacingOccurrences(of: "file://", with: "")
-//            .removingPercentEncoding
-//
-//        print(path ?? "Not found")
-//    }
+    //    func whereIsMySQLite() {
+    //        let path = FileManager
+    //            .default
+    //            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+    //            .last?
+    //            .absoluteString
+    //            .replacingOccurrences(of: "file://", with: "")
+    //            .removingPercentEncoding
+    //
+    //        print(path ?? "Not found")
+    //    }
     
 }
 
 // MARK: - UISearchBarDelegate Methods
 
 extension TodoListVC: UISearchBarDelegate {
-
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
         // COREDATA
-//        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//
-//        // predicate acts like a query or filter, using the format to specify what to filter
-//        // adding the [cd] ignores case and acentos sensitivity
-//        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-//
-//        // setting the descriptor. note that it expects an array or sortDescriptors but if you have one you can just put a single one inside an array
-//        // how to sort the data after the request
-//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//
-//        // performing the request
-//        loadItems(with: request, predicate: predicate)
+        //        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        //
+        //        // predicate acts like a query or filter, using the format to specify what to filter
+        //        // adding the [cd] ignores case and acentos sensitivity
+        //        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        //
+        //        // setting the descriptor. note that it expects an array or sortDescriptors but if you have one you can just put a single one inside an array
+        //        // how to sort the data after the request
+        //        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        //
+        //        // performing the request
+        //        loadItems(with: request, predicate: predicate)
         
         // REALM
         todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
-
+        
         tableView.reloadData()
     }
-
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
             loadItems()
-
+            
             DispatchQueue.main.async {
                 searchBar.resignFirstResponder()
             }
         }
     }
-
+    
 }
 
