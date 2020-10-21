@@ -9,6 +9,7 @@
 import UIKit
 //import CoreData
 import RealmSwift
+import ChameleonFramework
 
 class CategoryVC: SwipeTableVC {
     
@@ -17,15 +18,25 @@ class CategoryVC: SwipeTableVC {
     var categories: Results<Category>?
     
     // create the context from the AppDelegate, which is basically like the git staging area
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         tableView.rowHeight = 70.0
         
+        tableView.separatorStyle = .none
+        
         loadCategories()
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {
+            fatalError("Navigation controller does not exist.")
+        }
+        
+        navBar.backgroundColor = UIColor(hexString: "1D9BF6")
     }
     
     // MARK: - Table view data source Methods
@@ -41,7 +52,15 @@ class CategoryVC: SwipeTableVC {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         // adding additional code to the generic swipe cell, custom for the category cell
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet"
+        if let category = categories?[indexPath.row] {
+            guard let categoryColor = UIColor(hexString: category.color) else {fatalError()}
+            
+            cell.textLabel?.text = category.name
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+            cell.backgroundColor = categoryColor
+        }
+        
+        
         
         return cell
     }
